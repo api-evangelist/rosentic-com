@@ -1,0 +1,146 @@
+[
+  {
+    "date": "2026-07-30",
+    "title": "Every scan now shows its work",
+    "tag": "Product",
+    "body": "Scan results now carry receipts: how many branches were compared, how many pairs actually ran, and per-language parse coverage with a loud DEGRADED marker when a language saw files but produced nothing. Every scan also derives a unique identity key, so retries and duplicates are recognized instead of blended. And closing a finding now requires positive evidence: a scan can only resolve findings if it proves it executed, covered the full repo, and compared real pairs. A scan that did no work reads as exactly that and changes nothing. 273 regression fixtures."
+  },
+  {
+    "date": "2026-07-29",
+    "title": "rosentic-mcp 0.2.2",
+    "tag": "Release",
+    "body": "Every MCP result now names its engine: where it resolved from and whether it matches the current published image. When the server cannot verify the engine, results read unverified with the reason, instead of proceeding quietly. Engine resolution order is explicit, and a shadowed engine triggers a warning naming both."
+  },
+  {
+    "date": "2026-07-27",
+    "title": "Findings now explain themselves",
+    "tag": "Product",
+    "body": "Every finding names both branches, the file and line on each side, why each branch works on its own, and the specific edit that resolves it. UNSAFE reads as Breaking and WARNING as Possible break. The same wording now appears on the pull request comment, the CI step summary, the console, and the MCP response, and the CI summary panel is written for the first time. Machine fields are unchanged: execution status is a discrete field in every format, so an agent never has to parse prose to know whether the check ran."
+  },
+  {
+    "date": "2026-07-27",
+    "title": "rosentic-mcp 0.2.1: parallel worktrees, and a class of break that was invisible",
+    "tag": "Release",
+    "body": "Linked git worktrees now scan correctly; the packaged engine previously could not resolve refs from a worktree checkout, which is the environment parallel agent runs live in. Required-arity detection lands across the eight languages with default parameters: removing a default raises the required argument count and breaks callers without changing the parameter list, and that was previously undetectable. Kotlin and Dart imports and PHP globals now carry identity evidence, so a statically decidable call reports Breaking instead of Possible break. Scan coverage bands mean a repository the engine could not parse never reads as clear. Regression suite at 210 fixtures."
+  },
+  {
+    "date": "2026-07-23",
+    "title": "Rosentic Remote is live",
+    "tag": "Product",
+    "body": "The hosted MCP endpoint at api.rosentic.com/mcp is live: connect it as a custom connector in claude.ai, Claude Desktop, Cursor, or any MCP client and ask your repos what is true. run_status, which_lane, and get_verdict answer from stored keyed scan snapshots, every answer carries the scan SHA and its age, and stale snapshots return a rescan instruction instead of a guess. OAuth 2.1 with PKCE and dynamic client registration; scoped to your workspace, cross-org reads return NOT_FOUND."
+  },
+  {
+    "date": "2026-07-23",
+    "title": "rosentic-mcp 0.1.5: enforcement ships in the package",
+    "tag": "Release",
+    "body": "Seven local MCP tools (get_remediation_queue joins the six), plus enforcement: rosentic-mcp install-hooks wires a pre-write advisory and a pre-push gate that fail closed on UNSAFE, and config-shadow detection warns when a local config would shadow the packaged server. pip install --upgrade rosentic-mcp."
+  },
+  {
+    "date": "2026-07-10",
+    "category": "engine",
+    "version": "v1.8.0",
+    "title": "Dart lands as the 13th language, and the image ships CVE-clean.",
+    "body": "Dart is now fully wired: signature extraction, fixtures, the works. The regression suite grows to 133 fixtures. The engine image was rebuilt on a patched base and releases with zero known fixable vulnerabilities (Trivy). Cross-repo analysis code now ships inside the image, dormant until enabled."
+  },
+  {
+    "date": "2026-07-10",
+    "category": "action",
+    "title": "One approval installs Rosentic across the org.",
+    "body": "The Rosentic GitHub App provisions every repo from a single org-level install: it detects each repo's languages, opens one PR per repo with the workflow and agent configuration, and covers new repos the day they are created. Silent on clear by design: the first thing you hear from Rosentic is a real finding. A new /install page in the dashboard shows fleet coverage and time to first finding per repo. Uninstall is one deleted file."
+  },
+  {
+    "date": "2026-07-10",
+    "category": "action",
+    "title": "MCP server 0.1.4: six tools, pre-write checks, on PyPI.",
+    "body": "pip install rosentic-mcp. Six tools for any MCP-capable agent: check_file validates a proposed change against every active sibling branch before the write, check_conflicts scans before the push, and get_verdict looks up any recorded gate decision by commit SHA, alongside explain_conflict, list_branches, and get_policy. Local tools work fully offline; your code never leaves the machine."
+  },
+  {
+    "date": "2026-07-02",
+    "category": "engine",
+    "version": "v1.7.0",
+    "title": "The gate now enforces policy, and proves it.",
+    "body": "Gate verdicts obey your configured policy at scan time: advisory or blocking, severity thresholds, per-layer enforcement, branch-pattern rules. The built-in default exactly matches previous behavior, so nothing changes until you set a policy. Every verdict lands in an append-only, hash-chained audit ledger with the commit SHAs checked, the findings involved, the policy version in force, and a fingerprint that lets anyone replay the check and get the same answer. Anonymous telemetry now hashes branch names and commit SHAs on your runner per the published metadata contract."
+  },
+  {
+    "date": "2026-07-02",
+    "category": "dashboard",
+    "title": "Audit Trail, Agent Visibility, and Govern.",
+    "body": "Three new dashboard surfaces. Audit Trail: every gate verdict as replayable evidence, filterable and exportable as JSON or CSV. Agent Visibility: which agents hold which branches across your repos, with confidence-ranked attribution and live agent-pair divergences. Govern: versioned policy per repo or org, with overrides that require a stated reason and land in the audit trail. Policy decides; the ledger proves."
+  },
+  {
+    "date": "2026-05-10",
+    "category": "engine",
+    "version": "v1.4.5",
+    "title": "Framework detection and full-repo scanning improvements.",
+    "body": "Fixed route detection for Spring, Django, and Go chi frameworks where prefixed routes were not resolving correctly. Improved schema consumer extraction for repos with shared definitions across services. Scoped extraction on large repos to prevent timeouts. MCP server now installable via pip."
+  },
+  {
+    "date": "2026-04-25",
+    "category": "engine",
+    "title": "Major accuracy improvement.",
+    "body": "New validation pass dramatically reduces noise on large codebases. Tested against a production repo with hundreds of findings. Zero real conflicts lost. Full audit trail on every verdict."
+  },
+  {
+    "date": "2026-04-25",
+    "category": "languages",
+    "title": "PHP support added. 12 languages.",
+    "body": "Rosentic now covers PHP codebases including Laravel, Symfony, and vanilla PHP."
+  },
+  {
+    "date": "2026-04-24",
+    "category": "engine",
+    "title": "Accuracy improvements for Python and multi-file repos.",
+    "body": "Reduced false positives in Python codebases and repos where the same function name appears across multiple files."
+  },
+  {
+    "date": "2026-04-23",
+    "category": "engine",
+    "title": "TypeScript accuracy fix.",
+    "body": "Improved handling of TypeScript optional and default parameters. Fewer false positives on idiomatic TypeScript."
+  },
+  {
+    "date": "2026-04-22",
+    "category": "engine",
+    "version": "v1.3.0",
+    "title": "Refactor-aware detection.",
+    "body": "Rosentic now tracks functions that move between files during refactors. Fewer false positives on repos with active reorganization."
+  },
+  {
+    "date": "2026-03-24",
+    "category": "action",
+    "title": "Inline PR comments.",
+    "body": "Conflicts now appear as inline review comments on the exact file and line. Stale comments are cleaned up on force-pushes."
+  },
+  {
+    "date": "2026-03-23",
+    "category": "engine",
+    "title": "Accuracy fix for large repos.",
+    "body": "Eliminated a class of false positives that appeared in repos with deep history. Added a branch limit flag for very large monorepos."
+  },
+  {
+    "date": "2026-03-21",
+    "category": "languages",
+    "title": "GraphQL and Protobuf support.",
+    "body": "Rosentic now detects breaking changes across GraphQL schemas and Protobuf/gRPC definitions."
+  },
+  {
+    "date": "2026-03-12",
+    "category": "action",
+    "version": "v1.0.0",
+    "title": "GitHub Action, public release.",
+    "body": "Rosentic ships as a GitHub Action. One YAML file, runs on your runners, code never leaves. Free for open source."
+  },
+  {
+    "date": "2026-03-09",
+    "category": "languages",
+    "title": "Ruby support added. 11 languages.",
+    "body": "Rosentic now covers Python, JavaScript, TypeScript, Go, Java, Rust, Swift, C++, Kotlin, C#, and Ruby."
+  },
+  {
+    "date": "2026-03-07",
+    "category": "languages",
+    "version": "v0.1.0",
+    "title": "Engine, day one.",
+    "body": "Cross-branch compatibility detection across 10 languages. The foundation."
+  }
+]

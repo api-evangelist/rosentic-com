@@ -1,0 +1,71 @@
+generated: '2026-09-19'
+method: searched
+source: https://rosentic.com/pricing/
+docs:
+- https://rosentic.com/llms.txt
+- a2a/rosentic-com-agent-card.json
+plan_count: 6
+currency: USD
+model: >-
+  Detection is free at every tier; subscriptions buy stored history, repo/scan quotas and team features
+  ("Detection free forever. Paid adds memory."). Billed monthly through Stripe. Growth is sold as a
+  design-partner tier and Enterprise is custom.
+summary: >-
+  Six tiers as published on the pricing page and llms.txt on 2026-09-19. The pricing page shows fewer
+  numbers than llms.txt (it omits the free-key scan quota and the Growth quotas), so quotas below cite
+  which page states them. The agent card's x-rosentic.pricing block also lists free/team/growth with the
+  same prices and adds that Merge Index and private repos are Team-and-above.
+plans:
+- id: free-anonymous
+  name: Free (anonymous)
+  price: 0
+  currency: USD
+  period: month
+  included: full detection engine, PR comments/checks, unlimited scans, scan receipts; no signup, no API key
+  limits: [no stored history, 'A2A anonymous access: 3 requests/hour per IP, 250MB repo cap, public repos only (agent card)']
+  source: 'https://rosentic.com/pricing/ ("Check · free — $0, full engine, unlimited scans, no feature gates on detection, anonymous mode available")'
+- id: free-with-key
+  name: Free (with key)
+  price: 0
+  currency: USD
+  period: month
+  included: everything in anonymous plus stored history and dashboard
+  quota: {repos: 3, scans_per_month: 1000, history_days: 30}
+  source: 'https://rosentic.com/pricing/ ("free key: 3 repos · 30-day history") and https://rosentic.com/llms.txt ("3 repos, 1,000 scans/month, 30 days")'
+- id: solo
+  name: Solo (preview)
+  price: 9
+  currency: USD
+  period: month
+  billing: Stripe, monthly while subscribed; trial starts at the first scan
+  included: unlimited personal repos, 90-day searchable history, Builder Home ("ask from any chat"), Rosentic Remote
+  quota: {repos: unlimited personal, history_days: 90}
+  cancellation: '"Detection continues free. History outside the free window ages out. Nothing else changes."'
+  source: https://rosentic.com/pricing/
+- id: team
+  name: Team
+  price: 99
+  currency: USD
+  period: month
+  included: shared policies, org visibility, 90-day history, Merge Index, private repos, higher limits
+  quota: {repos: 10, scans_per_month: 5000, history_days: 90}
+  source: 'https://rosentic.com/pricing/ ("10 repos · 5,000 scans/mo · shared policies · org visibility · 90-day history") and agent card x-rosentic.pricing.team'
+- id: growth
+  name: Growth (design partner)
+  price: 499
+  currency: USD
+  period: month
+  included: org-wide Merge Index, cross-repo analysis, 1-year history
+  quota: {repos: 50, scans_per_month: 25000, history_days: 365}
+  source: 'https://rosentic.com/llms.txt ("50 repos, 25,000 scans/month, 1-year history"); pricing page shows "Growth $499 · design partner"; agent card x-rosentic.pricing.growth'
+- id: enterprise
+  name: Enterprise
+  price: null
+  currency: USD
+  period: custom
+  included: custom terms; VPC deployment is listed as planned on the trust page
+  source: 'https://rosentic.com/llms.txt ("Enterprise: custom")'
+overage: not published — quotas are stated as caps, with no per-scan overage price
+notes:
+- 'The pricing page carries the line "stored history comes from CI scans today · local memory arrives with the upload path", i.e. local MCP scans do not yet count toward or populate history.'
+- 'Free for open source is stated on the GitHub Action release (changelog 2026-03-12) and llms.txt.'

@@ -1,0 +1,58 @@
+generated: '2026-09-19'
+method: searched
+source: https://api.rosentic.com/.well-known/agent-card.json
+docs:
+- https://rosentic.com/docs/integrations/
+- https://rosentic.com/pricing/
+- https://rosentic.com/llms.txt
+- https://pypi.org/project/rosentic-mcp/
+limit_count: 4
+summary: >-
+  Rosentic publishes one true request-rate ceiling — the A2A anonymous limit of 3 requests per hour per IP
+  with a 250MB repository cap, stated in the agent card's authentication scheme and x-rosentic.rateLimits —
+  plus per-tier monthly scan quotas and repo caps, and per-call size caps on two MCP tools. Authenticated
+  rates are "higher limits" with no number. The REST error table documents 429 rate_limit_exceeded ("Retry
+  after the reset time") but names no RateLimit-* or Retry-After header, and the unauthenticated responses
+  observed on 2026-09-19 carried none.
+rate_limits:
+- name: A2A anonymous requests
+  scope: per-IP
+  limit: 3
+  window: 1 hour
+  metric: request
+  burst: null
+  applies_to: [https://api.rosentic.com/a2a — skills assess_integration_posture, check_conflicts, explain_conflict, list_branches on public repos]
+  constraints: [250MB repository cap, public repos only]
+  source: 'a2a/rosentic-com-agent-card.json — authentication.schemes[0].description "Public repos, 3 requests/hour per IP, 250MB repo cap"; x-rosentic.rateLimits.unauthenticated'
+- name: A2A / API authenticated requests
+  scope: per-API-key
+  limit: null
+  window: null
+  metric: request
+  note: '"Higher limits, private repo access, Merge Index access" — no number published.'
+  source: a2a/rosentic-com-agent-card.json — x-rosentic.rateLimits.authenticated
+- name: Scans per month (tier quota)
+  scope: per-workspace
+  metric: scan
+  window: calendar month
+  tiers: {free-with-key: 1000, team: 5000, growth: 25000, free-anonymous: unlimited, solo: not stated}
+  source: https://rosentic.com/llms.txt and https://rosentic.com/pricing/
+- name: Repositories (tier cap)
+  scope: per-workspace
+  metric: repository
+  tiers: {free-with-key: 3, team: 10, growth: 50, solo: unlimited personal}
+  source: https://rosentic.com/pricing/
+per_call_limits:
+- {tool: run_status, param: limit, default: 25, max: 100, source: 'https://pypi.org/project/rosentic-mcp/'}
+- {tool: which_lane, param: paths, min: 1, max: 100, source: 'https://pypi.org/project/rosentic-mcp/'}
+- {surface: A2A anonymous, param: repository size, max: 250MB, source: a2a/rosentic-com-agent-card.json}
+exhaustion:
+  status: 429
+  code: rate_limit_exceeded
+  message: Rate limit exceeded. Retry after the reset time.
+  headers: []
+  source: https://rosentic.com/docs/integrations/
+  note: No Retry-After, RateLimit-Limit/Remaining/Reset or X-RateLimit-* header is documented, and none was observed. An agent has only the status code and the documented sentence.
+observed:
+- {url: 'https://api.rosentic.com/mcp', method: POST, status: 401, rate_limit_headers: none, fetched: '2026-09-19'}
+- {url: 'https://api.rosentic.com/.well-known/agent-card.json', status: 200, rate_limit_headers: none, fetched: '2026-09-19'}

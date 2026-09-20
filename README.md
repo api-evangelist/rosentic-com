@@ -64,5 +64,9 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Rosentic is a company surfaced via the API Evangelist harvest backlog (source: a2a-registry) and added to the network as a stub for full-pipeline profiling.
+Rosentic checks the open branches in a git repository against each other before merge, catching the function-signature, HTTP-route, GraphQL/typed-schema and Protobuf/gRPC conflicts that pass CI on every branch individually and break main when parallel AI coding agents land together. Deterministic tree-sitter AST analysis across 13 languages, shipped as a GitHub Action and a local MCP server/CLI (rosentic-mcp on PyPI), with a hosted MCP endpoint behind OAuth 2.1, an A2A 0.3.0 agent card and a Bearer-key REST feed on api.rosentic.com. No OpenAPI is published.
 - https://rosentic.com/
+- Docs: https://rosentic.com/docs/
+- MCP: https://rosentic.com/mcp/ (hosted endpoint https://api.rosentic.com/mcp)
+- A2A agent card: https://api.rosentic.com/.well-known/agent-card.json
+- GitHub: https://github.com/Rosentic

@@ -1,0 +1,124 @@
+generated: '2026-09-19'
+method: probed
+source: >-
+  Live GET probes of the named /.well-known/* path list on api.rosentic.com (API, MCP, OAuth and A2A host)
+  and rosentic.com (website), 2026-09-19. Every row below is a request that was actually issued; every
+  status is the one returned. www.rosentic.com, docs.rosentic.com, status.rosentic.com and app.rosentic.com
+  do not resolve (NXDOMAIN) and are not hosts.
+summary:
+  hosts_probed: 2
+  paths_probed: 42
+  documents_served: 3
+  hit_count: 3
+  path_echo_control: passed
+  note: >-
+    api.rosentic.com serves three well-known documents: an RFC 8414 OAuth authorization-server metadata
+    document (issuer https://api.rosentic.com, authorization_code + refresh_token, PKCE S256, public-client
+    token auth "none", a registration_endpoint for RFC 7591 dynamic client registration, one scope
+    rosentic:remote:read, protected_resources [https://api.rosentic.com/mcp]); an RFC 9728 protected-resource
+    metadata document for the MCP resource (resource https://api.rosentic.com/mcp, authorization_servers
+    [https://api.rosentic.com], bearer_methods header, resource_documentation pointing at a GitHub docs page
+    that 404s anonymously) — also served at the path-suffixed /.well-known/oauth-protected-resource/mcp, which
+    is the exact URL the MCP endpoint's WWW-Authenticate resource_metadata parameter names; and an A2A agent
+    card (captured and graded in a2a/). Every other named path returns the host's real JSON 404
+    ({"error":"not_found"}, 21 bytes, application/json), and a negative-control path also 404s, so the 200s
+    are served documents. No security.txt, no OIDC discovery, no RFC 9727 API catalog, no APIs.json, no AAuth
+    resource document, no ai-plugin, no UCP/ACP manifest, no jwks. The website host rosentic.com is a Next.js
+    catch-all: every unknown path, the negative control included, returns HTTP 200 text/html with the same
+    8,425-byte marketing shell, so none of its 200s is a document and none is recorded as a hit. The one real
+    non-HTML document on the apex is /llms.txt (text/plain, 5,361 bytes), captured under llms/.
+hosts:
+- host: api.rosentic.com
+  role: API host, hosted MCP server (https://api.rosentic.com/mcp), OAuth 2.1 authorization server and A2A JSON-RPC host — one origin behind Cloudflare
+  documents:
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    content_type: application/json; charset=utf-8
+    bytes: 518
+    file: rosentic-com-oauth-authorization-server.json
+    standard: RFC 8414 OAuth 2.0 Authorization Server Metadata
+    note: issuer https://api.rosentic.com; registration_endpoint present (RFC 7591 DCR); code_challenge_methods_supported [S256]; token_endpoint_auth_methods_supported [none]; scopes_supported [rosentic:remote:read]; protected_resources [https://api.rosentic.com/mcp].
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    content_type: application/json; charset=utf-8
+    bytes: 267
+    file: rosentic-com-oauth-protected-resource.json
+    standard: RFC 9728 OAuth 2.0 Protected Resource Metadata
+    note: resource https://api.rosentic.com/mcp; authorization_servers [https://api.rosentic.com]; bearer_methods_supported [header]; scopes_supported [rosentic:remote:read]; resource_documentation https://github.com/Rosentic/rosentic/blob/main/docs/remote.md (404 anonymously — the Rosentic/rosentic repository is not public).
+  - path: /.well-known/oauth-protected-resource/mcp
+    status: 200
+    content_type: application/json; charset=utf-8
+    bytes: 267
+    file: rosentic-com-oauth-protected-resource.json
+    standard: RFC 9728 (path-suffixed form for the /mcp resource)
+    note: Byte-identical to the unsuffixed document. This is the URL the MCP endpoint's 401 names — WWW-Authenticate Bearer resource_metadata="https://api.rosentic.com/.well-known/oauth-protected-resource/mcp", scope="rosentic:remote:read" — so an MCP client following the RFC 9728 discovery chain lands here.
+  - path: /.well-known/agent-card.json
+    status: 200
+    content_type: application/json
+    bytes: 4669
+    file: ../a2a/rosentic-com-agent-card.json
+    standard: A2A Agent Card (protocolVersion 0.3.0)
+    note: Saved verbatim under a2a/ and graded in a2a/rosentic-com-a2a.yml (near-conformant). Counted once, in a2a/, not as a fourth document here.
+  - path: /.well-known/agent.json
+    status: 200
+    content_type: application/json
+    bytes: 4669
+    file: ../a2a/rosentic-com-agent-card.json
+    note: Legacy pre-0.3 path; byte-identical to the canonical card. The API root document names this path as agent_card_url.
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+    note: No OIDC discovery. The authorization server is OAuth 2.1 only (RFC 8414 document above).
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/ucp.json
+    status: 404
+  - path: /.well-known/acp.json
+    status: 404
+  - path: /.well-known/aauth-resource.json
+    status: 404
+  - path: /.well-known/apis.json
+    status: 404
+  - path: /apis.json
+    status: 404
+  - path: /apis.yml
+    status: 404
+  - path: /.well-known/jwks.json
+    status: 404
+  - path: /.well-known/mcp.json
+    status: 404
+  - path: /.well-known/rosentic-com-negative-control-9c1e4a7b.json
+    status: 404
+    control: negative
+    note: A path that cannot exist. Its JSON 404 proves the host does not echo or catch-all /.well-known/* requests.
+- host: rosentic.com
+  role: Website (Next.js on Vercel) — catch-all; every unknown path returns the 8,425-byte home shell with HTTP 200
+  soft_404_control:
+    url: https://rosentic.com/.well-known/rosentic-com-negative-control-9c1e4a7b.json
+    status: 200
+    content_type: text/html; charset=utf-8
+    bytes: 8425
+    note: Control probe. Any 200 on rosentic.com with this byte count is the catch-all page and is NOT a document.
+  documents:
+  - {path: /.well-known/security.txt, status: 200, content_type: text/html; charset=utf-8, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /.well-known/openid-configuration, status: 200, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /.well-known/oauth-authorization-server, status: 200, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /.well-known/oauth-protected-resource, status: 200, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /.well-known/api-catalog, status: 200, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /.well-known/ai-plugin.json, status: 200, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /.well-known/ucp.json, status: 200, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /.well-known/acp.json, status: 200, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /.well-known/aauth-resource.json, status: 200, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /.well-known/apis.json, status: 200, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /apis.json, status: 200, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /apis.yml, status: 200, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /.well-known/agent-card.json, status: 200, bytes: 8425, hit: false, note: catch-all shell — the real card is on api.rosentic.com}
+  - {path: /.well-known/agent.json, status: 200, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /robots.txt, status: 200, bytes: 8425, hit: false, note: catch-all shell — no robots.txt is served}
+  - {path: /sitemap.xml, status: 200, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /openapi.json, status: 200, bytes: 8425, hit: false, note: catch-all shell}
+  - {path: /llms.txt, status: 200, content_type: text/plain; charset=utf-8, bytes: 5361, hit: true, file: ../llms/rosentic-com-llms.txt, note: The one real machine document on the apex. Not a /.well-known/ path; captured under llms/ and pointed at with type LLMsTxt.}
+  - {path: /.well-known/rosentic-com-negative-control-9c1e4a7b.json, status: 200, bytes: 8425, hit: false, control: negative, note: The catch-all answers the impossible path too, which is what disqualifies every other 200 on this host.}

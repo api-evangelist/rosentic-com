@@ -1,0 +1,38 @@
+generated: '2026-09-19'
+method: searched
+source: https://github.com/Rosentic/cursor-plugin
+note: >-
+  Rosentic publishes its own Agent Skill: skills/cross-branch-check/SKILL.md in the Rosentic/cursor-plugin
+  repository (plugin.json 1.1.0, license BUSL-1.1), alongside a Cursor rule (rules/merge-safety.mdc) and the
+  MCP config that launches rosentic-mcp. Both files are saved VERBATIM here. Nothing was generated: there is
+  no OpenAPI to ground a generated skill in, and the provider-published one already covers the marquee flow
+  (list branches -> check conflicts -> explain the top finding) against the real MCP tool names. The skill's
+  tool names (list_branches, check_conflicts, explain_conflict) match the rosentic-mcp 0.2.9 tool list on PyPI
+  and the A2A card's skill ids.
+skills:
+- file: rosentic-com-cross-branch-check.md
+  name: Cross-Branch Merge Safety Check
+  method: searched
+  source: https://raw.githubusercontent.com/Rosentic/cursor-plugin/main/skills/cross-branch-check/SKILL.md
+  fetched: '2026-09-19'
+  http_status: 200
+  description: Before merging or pushing, check whether the branch is compatible with other active branches using the Rosentic MCP tools — check_conflicts to scan, explain_conflict for details, list_branches to see what is in flight.
+  api: mcp/rosentic-com-mcp.yml
+  surface: rosentic-mcp local stdio server
+  operations: 3
+  tools: [list_branches, check_conflicts, explain_conflict]
+  format: Cursor skill (frontmatter title + description, markdown workflow, JSON tool-call examples)
+- file: rosentic-com-merge-safety-rule.mdc
+  name: Consider checking cross-branch compatibility before push or PR creation
+  method: searched
+  source: https://raw.githubusercontent.com/Rosentic/cursor-plugin/main/rules/merge-safety.mdc
+  fetched: '2026-09-19'
+  http_status: 200
+  description: A Cursor rule (alwaysApply false) that surfaces the check_conflicts tool when the user is near a merge boundary or changing a contract other branches may call.
+  api: mcp/rosentic-com-mcp.yml
+  operations: 1
+  tools: [check_conflicts]
+  format: Cursor rule (.mdc)
+also_published:
+- {what: 'CLAUDE.md / AGENTS.md instruction', where: 'https://rosentic.com/mcp/ and the PyPI README', text: '"Before writing to a shared contract (types, API routes, schemas) or before a push, call the Rosentic check_conflicts MCP tool to verify your branch is compatible with other active branches."'}
+- {what: 'Claude Code PreToolUse hook', where: 'https://rosentic.com/mcp/', text: '.claude/hooks/rosentic-pre-push.sh — exit 2 with "run the check_conflicts MCP tool before pushing" when the Bash payload contains a push command'}

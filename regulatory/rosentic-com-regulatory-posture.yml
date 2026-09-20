@@ -1,0 +1,38 @@
+generated: '2026-09-19'
+method: searched
+probe: true
+source: https://rosentic.com/trust/
+signals: {}
+probed:
+- {url: 'https://rosentic.com/trust/', status: 200, bytes: 4771, note: 'Data-boundary page: three telemetry tiers (anonymous / keyed / VPC), "the code never goes to the engine", link to "the full metadata contract" — no certification, DPA, subprocessor list, residency region or retention schedule beyond the pricing-page history windows.'}
+- {url: 'https://rosentic.com/blog/your-code-is-never-stored/', status: 200, note: '2026-03-24 security post: code analyzed and discarded, never persisted; 2FA on maintainer accounts; image pinned by SHA digest; GITHUB_TOKEN only; no outbound calls from the engine; deterministic (no LLM). A published data-handling and supply-chain statement, not one of the fourteen enumerated signals.'}
+- {url: 'https://rosentic.com/accessibility', status: 200, bytes: 8425, note: catch-all shell}
+- {url: 'https://rosentic.com/legal/subprocessors', status: 200, bytes: 8425, note: catch-all shell}
+- {url: 'https://rosentic.com/legal/dpa', status: 200, bytes: 8425, note: catch-all shell}
+- {url: 'https://rosentic.com/privacy/requests', status: 200, bytes: 8425, note: catch-all shell}
+- {url: 'https://rosentic.com/transparency', status: 200, bytes: 8425, note: catch-all shell}
+- {url: 'https://rosentic.com/security/sbom', status: 200, bytes: 8425, note: catch-all shell}
+- {url: 'https://rosentic.com/docs/data-residency', status: 200, bytes: 8425, note: catch-all shell}
+- {url: 'https://rosentic.com/ai', status: 200, bytes: 8425, note: catch-all shell}
+- {url: 'https://rosentic.com/terms', status: 200, bytes: 8425, note: 'catch-all shell — no Terms of Service page is published, although the Action LICENSE refers to "the Rosentic Terms of Service"'}
+- {url: 'https://rosentic.com/privacy', status: 200, bytes: 8425, note: 'catch-all shell — no privacy policy page is published'}
+- {url: 'https://api.rosentic.com/.well-known/security.txt', status: 404}
+considered_not_recorded:
+- signal: ai_transparency
+  why: >-
+    The provider repeatedly states the engine uses no LLM ("0 LLMs in the engine", "Deterministic: no LLM,
+    no model, no hallucination"). That is a statement that AI is NOT used in the product, not a disclosure of
+    AI interaction or AI-generated content of the kind the AI-transparency regimes ask for; recording it
+    would credit a signal the page does not carry.
+- signal: incident_notification / subprocessors / data_subject_request
+  why: No DPA, privacy policy or subprocessor table exists on any reachable page; the trust page describes what data moves, not who processes it or how to request it.
+- signal: support_lifetime
+  why: No support period is stated anywhere (see lifecycle/).
+- signal: sbom
+  why: >-
+    The engine image "releases with zero known fixable vulnerabilities (Trivy)" per the 2026-07-10 changelog
+    entry, but no SBOM document or format is published. Search only; never derived.
+note: >-
+  An empty signals map is the measurement. Rosentic publishes a clear, specific data-boundary statement and
+  supply-chain controls, and none of the fourteen enumerated regulatory artifacts. Every conventional path
+  on the apex returns the Next.js catch-all (8,425 bytes), which is a 200 that means "no such page".

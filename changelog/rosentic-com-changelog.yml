@@ -1,0 +1,120 @@
+generated: '2026-09-19'
+method: searched
+source: https://rosentic.com/changelog.json
+source_detail: >-
+  A dated, machine-readable JSON feed (23 entries, 9,649 bytes, application/json) linked from the human
+  changelog page https://rosentic.com/changelog/ ("JSON feed"). Saved verbatim as
+  changelog/rosentic-com-changelog.json. Entries carry date, title, body and either a tag (Product |
+  Release) or a category (engine | action | dashboard | languages); a minority carry a version. The human
+  page renders the same list client-side and links the GitHub releases as the second follow channel.
+scheme:
+  version_format: semver per artifact — engine vX.Y.Z (v0.1.0 … v1.8.0), Action vX.Y.Z tags plus floating v1, rosentic-mcp X.Y.Z on PyPI
+  date_format: YYYY-MM-DD
+  ordering: reverse chronological
+  breaking_marker: none — entries do not flag breaking changes; the feed has no "breaking" field
+current_version:
+  engine: v1.8.0
+  rosentic_mcp: 0.2.9 (PyPI; the feed's newest MCP entry is 0.2.2)
+  github_action: v1.8.0 / v1
+entry_count: 23
+first_entry: '2026-03-07'
+latest_entry: '2026-07-30'
+feed_staleness_note: >-
+  The feed's last entry is 2026-07-30 while PyPI shows rosentic-mcp 0.2.3–0.2.9 released 2026-08-05 through
+  2026-09-05 — seven package releases the changelog does not mention. The changelog lags the registry by six
+  weeks as of 2026-09-19.
+entries:
+- date: '2026-07-30'
+  tag: Product
+  title: Every scan now shows its work
+  kind: addition
+  highlights: [scan receipts — branches compared, pairs run, per-language parse coverage with a DEGRADED marker, unique scan identity key so retries and duplicates are recognized]
+- date: '2026-07-29'
+  tag: Release
+  version: rosentic-mcp 0.2.2
+  title: rosentic-mcp 0.2.2
+  kind: addition
+  highlights: [every MCP result names its engine and whether it matches the published image, unverified results say so with the reason, explicit engine resolution order and shadowed-engine warning]
+- date: '2026-07-27'
+  tag: Product
+  title: Findings now explain themselves
+  kind: addition
+  highlights: [each finding names both branches with file and line on each side and the specific resolving edit, UNSAFE rendered as Breaking and WARNING as Possible break across PR comment / CI summary / console / MCP]
+- date: '2026-07-27'
+  tag: Release
+  version: rosentic-mcp 0.2.1
+  title: 'rosentic-mcp 0.2.1: parallel worktrees, and a class of break that was invisible'
+  kind: addition
+  highlights: [linked git worktrees scan correctly, required-arity detection across eight languages with default parameters]
+- date: '2026-07-23'
+  tag: Product
+  title: Rosentic Remote is live
+  kind: addition
+  highlights: [hosted MCP endpoint at api.rosentic.com/mcp, tools run_status / which_lane / get_verdict from stored keyed scan snapshots, every answer carries the scan SHA and its age]
+- date: '2026-07-23'
+  tag: Release
+  version: rosentic-mcp 0.1.5
+  title: 'rosentic-mcp 0.1.5: enforcement ships in the package'
+  kind: addition
+  highlights: [seventh local tool get_remediation_queue, rosentic-mcp install-hooks pre-write advisory and pre-push gate failing closed on UNSAFE, config-shadow detection]
+- date: '2026-07-10'
+  category: engine
+  version: v1.8.0
+  title: Dart lands as the 13th language, and the image ships CVE-clean.
+  kind: addition
+  highlights: [Dart support, 133 regression fixtures, engine image rebuilt on a patched base with zero known fixable vulnerabilities (Trivy), dormant cross-repo analysis code shipped in the image]
+- date: '2026-07-10'
+  category: action
+  title: One approval installs Rosentic across the org.
+  kind: addition
+  highlights: [GitHub App provisions every repo from one org-level install with one PR per repo, covers new repos automatically, silent on clear scans]
+- date: '2026-07-10'
+  category: action
+  title: 'MCP server 0.1.4: six tools, pre-write checks, on PyPI.'
+  kind: addition
+  highlights: [pip install rosentic-mcp, check_file pre-write validation, check_conflicts, get_verdict, explain_conflict, list_branches, get_policy]
+- date: '2026-07-02'
+  category: engine
+  version: v1.7.0
+  title: The gate now enforces policy, and proves it.
+  kind: addition
+  highlights: [verdicts obey configured policy (advisory or blocking, severity thresholds, per-layer enforcement, branch-pattern rules), built-in default matches previous behaviour, append-only hash-chained audit ledger]
+- date: '2026-07-02'
+  category: dashboard
+  title: Audit Trail, Agent Visibility, and Govern.
+  kind: addition
+  highlights: [Audit Trail exportable as JSON or CSV, Agent Visibility with confidence-ranked attribution, Govern versioned policy per repo]
+- date: '2026-05-10'
+  category: engine
+  version: v1.4.5
+  title: Framework detection and full-repo scanning improvements.
+  kind: fix
+  highlights: [route detection fixes for Spring / Django / Go chi, schema consumer extraction for shared definitions, scoped extraction on large repos, MCP server installable via pip]
+- date: '2026-04-22'
+  category: engine
+  version: v1.3.0
+  title: Refactor-aware detection.
+  kind: addition
+  highlights: [tracks functions that move between files during refactors]
+- date: '2026-03-24'
+  category: action
+  title: Inline PR comments.
+  kind: addition
+  highlights: [inline review comments on the exact file and line, stale comments cleaned up on force-push]
+- date: '2026-03-21'
+  category: languages
+  title: GraphQL and Protobuf support.
+  kind: addition
+- date: '2026-03-12'
+  category: action
+  version: v1.0.0
+  title: GitHub Action, public release.
+  kind: addition
+  highlights: [one YAML file, runs on the consumer's runners, free for open source]
+- date: '2026-03-07'
+  category: languages
+  version: v0.1.0
+  title: Engine, day one.
+  kind: addition
+  highlights: [cross-branch compatibility detection across 10 languages]
+older_entries_omitted: 6 (accuracy fixes and language additions between 2026-03-09 and 2026-04-25 — see the verbatim feed)

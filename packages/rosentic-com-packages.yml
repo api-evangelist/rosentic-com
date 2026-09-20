@@ -1,0 +1,87 @@
+generated: '2026-09-19'
+method: searched
+source: https://pypi.org/pypi/rosentic-mcp/json
+docs:
+- https://rosentic.com/mcp/
+- https://rosentic.com/docs/
+- https://github.com/Rosentic
+package_count: 4
+official_count: 4
+summary: >-
+  Rosentic's distributable surface is one PyPI package (the local MCP server, which is also the CLI), one
+  container image (the proprietary engine), one GitHub Action wrapper and one Cursor plugin — all first-party
+  under the Rosentic GitHub organization. There is no REST client library in any language: npm search for
+  "rosentic" returns nothing, and the docs never name an SDK. Registry metadata was read from the
+  unauthenticated JSON/OCI endpoints on 2026-09-19; the GitHub REST API was rate-limited (403, core remaining
+  0) during this run so tag dates for the Action come from the releases page HTML.
+packages:
+- language: python
+  registry: pypi
+  name: rosentic-mcp
+  url: https://pypi.org/project/rosentic-mcp/
+  source: https://github.com/Rosentic/rosentic-action
+  install: pip3 install --upgrade rosentic-mcp
+  official: true
+  kind: mcp-server + cli
+  version: 0.2.9
+  published: '2026-09-05'
+  first_release: {version: 0.1.0, published: '2026-05-20'}
+  release_count: 15
+  requires_python: '>=3.11'
+  dependencies: [fastmcp>=3.4.4, pyyaml>=6.0.3]
+  author: Rosentic <hello@rosentic.com>
+  classifiers: ['Development Status :: 4 - Beta']
+  note: >-
+    The PyPI README still titles itself "Rosentic MCP Server 0.2.2" while the registry's latest is 0.2.9 —
+    five releases (0.2.5–0.2.9) landed 2026-09-03..05 without a README bump, and the website's MCP page and
+    llms.txt also say 0.2.2. Cadence is healthy (fifteen releases in under four months); the docs lag the
+    registry.
+- language: docker
+  registry: ghcr
+  name: ghcr.io/rosentic/rosentic-engine
+  url: https://github.com/orgs/Rosentic/packages/container/package/rosentic-engine
+  install: 'docker pull ghcr.io/rosentic/rosentic-engine:latest   # pulled automatically by the Action and by rosentic-mcp on first scan'
+  official: true
+  kind: engine container (proprietary; Rosentic Terms of Service per the Action LICENSE)
+  version: null
+  published: null
+  note: >-
+    The OCI tags/list endpoint (anonymous pull token) answers with "latest" plus commit-SHA tags only — no
+    semver tag — and the tags list carries no dates, so version and published are null. The GitHub Action
+    pins the image by immutable digest
+    sha256:0e008e3f35748716aa763490b387bc8dc2ce72e96c0ed49753efe92d3efb4193 (action.yml, main) and the
+    changelog dates the engine as v1.8.0 on 2026-07-10 ("ships CVE-clean", Trivy), which is the newest
+    engine version the provider has published a number for.
+- language: yaml
+  registry: github-marketplace
+  name: Rosentic/rosentic-action
+  url: https://github.com/marketplace/actions/rosentic-cross-branch-compatibility-check
+  source: https://github.com/Rosentic/rosentic-action
+  install: 'uses: Rosentic/rosentic-action@v1'
+  official: true
+  kind: github-action (Docker action wrapping the engine image)
+  version: v1.8.0
+  published: '2026-07-10'
+  note: >-
+    Tags v1.0.0, v1.1.0, v1.7.0, v1.8.0 plus the floating v1 (and v1-rc) on the releases page; the newest
+    dated release entry is 2026-07-10T18:23:22Z. The repo's CLAUDE.md documents that v1 is force-moved to
+    every main commit, so "@v1" is a moving pointer, not a pinned release. Inputs: scan-mode (pr|full|
+    siblings), branches, format (markdown|text|json), stale-days (30), mode (audit|enforce), api-key,
+    active-only (true).
+- language: json
+  registry: cursor-plugin
+  name: rosentic (Cursor plugin)
+  url: https://github.com/Rosentic/cursor-plugin
+  install: '/plugin marketplace add Rosentic/rosentic; /plugin install rosentic@rosentic-rosentic  (per https://rosentic.com/mcp/; the Rosentic/rosentic repo 404s anonymously — the public source is Rosentic/cursor-plugin)'
+  official: true
+  kind: editor plugin (mcp.json + one skill + one rule; license BUSL-1.1)
+  version: 1.1.0
+  published: '2026-05-19'
+  note: Version and date from the repo's .cursor-plugin/plugin.json and CHANGELOG.md; there is no registry metadata endpoint for a Cursor plugin.
+searched:
+- {registry: pypi, query: 'https://pypi.org/pypi/rosentic-mcp/json', status: 200, result: 'rosentic-mcp 0.2.9'}
+- {registry: npm, query: 'https://registry.npmjs.org/-/v1/search?text=rosentic&size=10', status: 200, result: 0 packages}
+- {registry: ghcr, query: 'https://ghcr.io/v2/rosentic/rosentic-engine/tags/list', status: 200, result: 'latest + commit-SHA tags'}
+- {registry: github-org, query: 'https://github.com/orgs/Rosentic/repositories', status: 200, result: 'cursor-plugin, rosentic-action, rosentic-demo, rosentic-demo-fullstack, rosentic-simulate (5 public repos)'}
+- {registry: github-api, query: 'https://api.github.com/orgs/Rosentic', status: 403, result: 'rate-limited during this run (unauthenticated core quota exhausted)'}
+- {registry: postman, query: 'Postman public search "rosentic"', status: 200, result: '0 workspaces, 0 collections'}

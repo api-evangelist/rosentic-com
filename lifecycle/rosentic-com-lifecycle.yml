@@ -1,0 +1,65 @@
+generated: '2026-09-19'
+method: searched
+source: https://rosentic.com/changelog.json
+docs:
+- https://rosentic.com/changelog/
+- https://github.com/Rosentic/rosentic-action/releases
+- https://pypi.org/project/rosentic-mcp/
+- https://rosentic.com/docs/
+versioning:
+  scheme: >-
+    Per-artifact semver with no version in any URL path except the REST feed's /v1/ prefix. Four independent
+    version lines: the engine image (v1.8.0, 2026-07-10, per changelog; distributed as ghcr.io/rosentic/
+    rosentic-engine pinned by digest), the GitHub Action (tags v1.0.0…v1.8.0 with a floating v1 that the
+    repo's CLAUDE.md force-moves to every main commit), the rosentic-mcp package (0.2.9 on PyPI, 2026-09-05;
+    the docs still say 0.2.2) and the agent card (version 1.0.0, protocolVersion 0.3.0).
+  current:
+    engine: v1.8.0 (2026-07-10)
+    github_action: v1.8.0 tag, v1 floating (newest release 2026-07-10)
+    rosentic_mcp: 0.2.9 (2026-09-05)
+    agent_card: 1.0.0
+    rest_feed: /v1/ (GET /v1/feed/rules)
+  policy_published: false
+  note: >-
+    No versioning policy page exists. The docs never say how long an engine or Action version is supported,
+    and the Action's own install instruction ("uses: Rosentic/rosentic-action@v1") resolves to whatever main
+    was last pushed, so a consumer cannot pin a released version by following the docs.
+deprecation:
+  policy_published: false
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  deprecated_operations: []
+  documented_retirements: []
+  note: >-
+    No deprecation policy, no Sunset/Deprecation headers documented, no retired endpoints named. The
+    changelog records one behavioural change consumers should treat as breaking — the Action switched its
+    image reference from the mutable :latest tag to a pinned SHA digest (action.yml comment; 2026-03-24 post
+    "Docker images pinned by SHA digest") — announced as a security improvement rather than a deprecation.
+    No Deprecation pointer is emitted.
+status_page:
+  url: null
+  probed:
+  - {url: 'https://status.rosentic.com/', status: NXDOMAIN}
+  - {url: 'https://rosentic.com/status', status: 200, bytes: 8425, note: 'catch-all marketing shell, not a status page'}
+  - {url: 'https://api.rosentic.com/health', status: 404}
+  note: No status page, no uptime commitment, no incident history published. No StatusPage pointer is emitted.
+sla:
+  url: null
+  uptime_target: null
+  note: >-
+    No SLA. The pricing page states what a subscription buys and what cancelling does ("Detection continues
+    free. History outside the free window ages out.") but makes no availability commitment. The only
+    time-bound guarantees published are on the data side: 30-day (free) / 90-day (Solo, Team) / 1-year
+    (Growth) history retention, a 60-second scan-result cache and a 300-second sibling-index staleness
+    window in the local MCP server.
+changelog:
+  url: https://rosentic.com/changelog/
+  feed: https://rosentic.com/changelog.json
+  entries: 23
+  first: '2026-03-07'
+  latest: '2026-07-30'
+  artifact: changelog/rosentic-com-changelog.yml
+support_lifetime:
+  stated_period: null
+  note: No support period is stated anywhere found (docs, pricing, PyPI, Action README, action.yml).

@@ -1,0 +1,100 @@
+generated: '2026-09-19'
+method: searched
+source: https://rosentic.com/docs/integrations/
+docs:
+- https://rosentic.com/docs/integrations/
+- https://pypi.org/project/rosentic-mcp/
+format: json-error-code
+note: >-
+  No OpenAPI exists to derive from. The REST table below is the provider's published error reference for
+  the dashboard/feed API (https://rosentic.com/docs/integrations/, "API Reference — Error responses"); the
+  envelopes and JSON-RPC codes below were observed live on 2026-09-19 with unauthenticated, read-only
+  requests. Error bodies are plain {"error": "<code>"} objects (RFC 6749 shape on the OAuth endpoints), not
+  RFC 9457 problem details.
+envelopes:
+- surface: REST (api.rosentic.com)
+  shape: '{"error": "<snake_case_code>"}'
+  observed: '{"error":"not_found"} — 21 bytes, application/json, on every unknown path and on GET /v1/feed/rules without a key'
+- surface: OAuth endpoints
+  shape: '{"error": "<rfc6749_code>", "error_description": "<text>"}'
+  observed: ['GET /oauth/authorize -> 400 {"error":"invalid_request","error_description":"response_type must be code"}', 'POST /oauth/register {} -> 400 {"error":"invalid_client_metadata","error_description":"redirect_uris must contain 1 to 10 HTTPS or loopback HTTP URIs without fragments"}', 'GET /oauth/register -> 405 {"error":"invalid_request","error_description":"method not allowed"}']
+- surface: MCP (JSON-RPC 2.0)
+  shape: '{"jsonrpc":"2.0","id":…,"error":{"code":<int>,"message":"…","data":{"error":{"code":"<UPPER_CODE>","message":"…","next_step":"…"},"connect":{…}}}}'
+  observed: 'POST /mcp tools/list -> HTTP 401, code -32001 "Authentication required", data.error.code AUTH_REQUIRED, plus WWW-Authenticate Bearer resource_metadata=…, scope="rosentic:remote:read"'
+- surface: A2A (JSON-RPC 2.0)
+  shape: '{"jsonrpc":"2.0","id":…,"error":{"code":<int>,"message":"…"}}'
+  observed: ['POST /a2a tasks/get (unknown id) -> HTTP 200, code -32004 "Task not found"', 'POST /a2a agent/getAuthenticatedExtendedCard -> HTTP 200, code -32601 "Method not found"']
+problems:
+- status: 400
+  code: invalid_request
+  title: Malformed request or missing fields.
+  surface: REST
+  source: https://rosentic.com/docs/integrations/
+- status: 401
+  code: unauthorized
+  title: Missing or invalid API key.
+  surface: REST
+  remediation: 'Send Authorization: Bearer $ROSENTIC_API_KEY (ros_live_ key from https://api.rosentic.com/onboard).'
+  source: https://rosentic.com/docs/integrations/
+  observed_divergence: 'GET https://api.rosentic.com/v1/feed/rules with no key returned 404 {"error":"not_found"}, not 401, on 2026-09-19.'
+- status: 403
+  code: plan_required
+  title: Endpoint requires a higher plan.
+  surface: REST
+  remediation: See plans/rosentic-com-plans-pricing.yml — Merge Index and org-wide reads are Team ($99/mo) and Growth ($499/mo) features.
+  source: https://rosentic.com/docs/integrations/
+- status: 404
+  code: repo_not_found
+  title: Repo is not connected.
+  surface: REST
+  remediation: Connect the repository in the dashboard (install the GitHub App or claim scan history).
+  source: https://rosentic.com/docs/integrations/
+- status: 404
+  code: not_found
+  title: Generic not-found envelope for unknown routes.
+  surface: REST
+  source: observed on api.rosentic.com 2026-09-19
+- status: 408
+  code: scan_timeout
+  title: Scan exceeded its time budget.
+  surface: REST (POST /v1/scan — documented as Coming Soon)
+  source: https://rosentic.com/docs/integrations/
+- status: 429
+  code: rate_limit_exceeded
+  title: Rate limit exceeded. Retry after the reset time.
+  surface: REST
+  remediation: Back off until the reset time; the docs do not name a Retry-After or RateLimit-* header. See rate-limits/rosentic-com-rate-limits.yml.
+  source: https://rosentic.com/docs/integrations/
+- status: 500
+  code: internal_error
+  title: Unexpected server error.
+  surface: REST
+  source: https://rosentic.com/docs/integrations/
+- status: 503
+  code: scan_unavailable
+  title: Hosted scan runtime unavailable.
+  surface: REST (POST /v1/scan — documented as Coming Soon)
+  source: https://rosentic.com/docs/integrations/
+- status: 401
+  code: -32001 / AUTH_REQUIRED
+  title: Authentication required (MCP)
+  surface: MCP
+  remediation: Follow the WWW-Authenticate resource_metadata URL to the RFC 9728 document, register a client at /oauth/register, complete authorization-code + PKCE for scope rosentic:remote:read, or send a Rosentic API key as a Bearer token.
+  source: observed 2026-09-19
+- status: 200
+  code: -32004
+  title: Task not found (A2A)
+  surface: A2A
+  note: 'A2A assigns TaskNotFoundError -32001; this responder uses -32004. Recorded as a deviation in a2a/rosentic-com-a2a.yml.'
+  source: observed 2026-09-19
+- status: 200
+  code: -32601
+  title: Method not found (JSON-RPC)
+  surface: A2A / MCP
+  source: observed 2026-09-19
+tool_level_statuses:
+  note: >-
+    The MCP tools carry an application-level execution_status rather than an error: EXECUTED, CACHED,
+    DEGRADED, NOT_EXECUTED; Rosentic Remote returns RESCAN_REQUIRED for a stale snapshot and NOT_FOUND for a
+    cross-workspace read; findings are SAFE / WARNING / UNSAFE (the gate exits 0 clean, 1 UNSAFE, 2 scan
+    error). Source: https://pypi.org/project/rosentic-mcp/ and https://rosentic.com/mcp/.

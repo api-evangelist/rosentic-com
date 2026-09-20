@@ -1,0 +1,51 @@
+generated: '2026-09-19'
+method: searched
+source: https://api.rosentic.com/.well-known/oauth-authorization-server
+docs:
+- https://rosentic.com/mcp/
+- well-known/rosentic-com-oauth-authorization-server.json
+- well-known/rosentic-com-oauth-protected-resource.json
+note: >-
+  No OpenAPI declares an oauth2 scheme, so derive-oauth-scopes.py has nothing to read; this file is written
+  from the provider's live RFC 8414 and RFC 9728 discovery documents on api.rosentic.com and the 401
+  challenge the MCP endpoint returns. Exactly one scope is published, for one resource. The provider's
+  human docs do not publish a scopes reference page.
+schemes:
+- name: Rosentic Remote OAuth 2.1
+  type: oauth2
+  source: well-known/rosentic-com-oauth-authorization-server.json
+  issuer: https://api.rosentic.com
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://api.rosentic.com/oauth/authorize
+    tokenUrl: https://api.rosentic.com/oauth/token
+    refreshUrl: https://api.rosentic.com/oauth/token
+    pkce: S256 (code_challenge_methods_supported)
+    client_type: public (token_endpoint_auth_methods_supported [none])
+    grant_types: [authorization_code, refresh_token]
+    response_types: [code]
+  registration_endpoint: https://api.rosentic.com/oauth/register
+  dynamic_client_registration: true
+  dcr_probe:
+    fetched: '2026-09-19'
+    method: POST
+    body: '{}'
+    http_status: 400
+    response: '{"error":"invalid_client_metadata","error_description":"redirect_uris must contain 1 to 10 HTTPS or loopback HTTP URIs without fragments"}'
+    note: RFC 7591-shaped error for an empty registration request; no client was registered. GET returns 405 method not allowed.
+  protected_resources: [https://api.rosentic.com/mcp]
+scopes:
+- scope: rosentic:remote:read
+  description: >-
+    Read access to Rosentic Remote — the hosted MCP tools run_status, which_lane and get_verdict, which answer
+    from stored scan snapshots scoped to the caller's workspace. The only scope the authorization server
+    advertises and the scope the MCP endpoint's WWW-Authenticate challenge demands.
+  resource: https://api.rosentic.com/mcp
+  flows: [authorizationCode]
+  sources: [well-known/rosentic-com-oauth-authorization-server.json, well-known/rosentic-com-oauth-protected-resource.json, 'MCP 401 WWW-Authenticate: Bearer resource_metadata="https://api.rosentic.com/.well-known/oauth-protected-resource/mcp", scope="rosentic:remote:read"']
+  write_scope: none published — the remote surface is read-only
+github_oauth_delegation:
+  note: >-
+    Dashboard sign-in (https://api.rosentic.com/auth/github) is a separate GitHub OAuth app requesting
+    read:org read:user user:email (observed in the 302 Location); those are GitHub's scopes, not Rosentic's,
+    and are recorded in authentication/rosentic-com-authentication.yml rather than here.

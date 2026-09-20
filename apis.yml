@@ -1,23 +1,199 @@
 aid: rosentic-com
 name: Rosentic
-description: 'Rosentic is a company surfaced via the API Evangelist harvest backlog (source: a2a-registry)
-  and added to the network as a stub for full-pipeline profiling.'
+description: >-
+  Rosentic is a developer-tools company whose product checks the open branches in a git repository against
+  each other before merge, catching the function-signature mismatches, HTTP route contract breaks,
+  GraphQL/typed-schema conflicts and Protobuf/gRPC changes that pass CI on every branch individually and
+  break main when parallel AI coding agents land together. The engine is deterministic tree-sitter AST
+  analysis across 13 languages with no LLM in the scan path, shipped as a GitHub Action that runs on the
+  consumer's own runner and as rosentic-mcp on PyPI, a local MCP server and CLI with nine tools. Hosted
+  surfaces on api.rosentic.com: Rosentic Remote, an MCP endpoint behind OAuth 2.1 with PKCE and dynamic
+  client registration; an A2A 0.3.0 agent card with five skills and a live JSON-RPC endpoint; and a
+  Bearer-key REST feed. Detection is free at every tier; paid plans buy stored history and quotas. No
+  OpenAPI is published.
 url: https://raw.githubusercontent.com/api-evangelist/rosentic-com/refs/heads/main/apis.yml
+image: https://raw.githubusercontent.com/Rosentic/cursor-plugin/main/assets/logo.png
 x-type: company
 x-source: harvest:a2a-registry
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment pass 2026-09-19 (local-v3; was a2a-registry harvest stub)
 specificationVersion: '0.20'
 created: '2026-09-19'
 modified: '2026-09-19'
 tags:
-- Company
-apis: []
+- Developer Tools
+- CI/CD
+- Git
+- Static Analysis
+- Merge Safety
+- AI Coding Agents
+- MCP
+- A2A
+- GitHub Actions
+- agent-native
+apis:
+- aid: rosentic-com:rosentic-remote-mcp-server
+  name: Rosentic Remote MCP Server
+  image: https://raw.githubusercontent.com/Rosentic/cursor-plugin/main/assets/logo.png
+  description: >-
+    Hosted Model Context Protocol endpoint at https://api.rosentic.com/mcp (Streamable HTTP, POST), live
+    since 2026-07-23, exposing three read tools over stored scan snapshots — run_status (every lane in a
+    run: branch, head, merged or not, sequence position, what is clear to land next), which_lane (which
+    lane owns a set of paths per the run manifest) and get_verdict (the recorded gate decision for a commit
+    SHA). Every answer carries the scan SHA and its age and returns RESCAN_REQUIRED past the staleness
+    window; reads are workspace-scoped and cross-org reads return NOT_FOUND. Access is OAuth 2.1
+    authorization-code with PKCE S256 and RFC 7591 dynamic client registration (scope rosentic:remote:read;
+    an anonymous tools/list returns HTTP 401 with an RFC 9728 WWW-Authenticate challenge) or a Rosentic API
+    key as a Bearer token, so the live tool schemas are auth-gated. The same provider ships rosentic-mcp, a
+    local stdio server on PyPI with nine tools, six of them fully offline.
+  humanURL: https://rosentic.com/mcp/
+  baseURL: https://api.rosentic.com/mcp
+  tags:
+  - MCP
+  - agent-native
+  - Merge Safety
+  properties:
+  - type: MCPServer
+    url: mcp/rosentic-com-mcp.yml
+  - type: MCPServer
+    name: Rosentic Remote endpoint (Streamable HTTP, OAuth 2.1)
+    url: https://api.rosentic.com/mcp
+  - type: Documentation
+    url: https://rosentic.com/mcp/
+  - type: OAuthScopes
+    url: scopes/rosentic-com-scopes.yml
+  - type: Authentication
+    url: authentication/rosentic-com-authentication.yml
+- aid: rosentic-com:rosentic-a2a-agent
+  name: Rosentic A2A Agent
+  image: https://raw.githubusercontent.com/Rosentic/cursor-plugin/main/assets/logo.png
+  description: >-
+    Agent2Agent protocol surface: an agent card served from https://api.rosentic.com/.well-known/agent-card.json
+    (protocolVersion 0.3.0, version 1.0.0, streaming true, stateTransitionHistory true; also byte-identical
+    at the legacy /.well-known/agent.json) advertising five skills — assess_integration_posture,
+    check_conflicts, explain_conflict, list_branches and the key-gated merge_index — served by a live
+    JSON-RPC 2.0 endpoint at https://api.rosentic.com/a2a (tasks/get for an unknown id answers "Task not
+    found"). Four skills are anonymous on public repositories at 3 requests per hour per IP with a 250MB
+    repo cap; a Bearer API key unlocks private repos, higher limits and Merge Index. The skills serve
+    STORED scan results produced by the GitHub Action or local MCP; the A2A endpoint does not itself run the
+    engine. Graded near-conformant against A2A 1.0.0 (no preferredTransport; legacy authentication block).
+  humanURL: https://rosentic.com/docs/
+  baseURL: https://api.rosentic.com/a2a
+  tags:
+  - A2A
+  - agent-native
+  - Merge Safety
+  properties:
+  - type: AgentCard
+    url: a2a/rosentic-com-a2a.yml
+  - type: AgentCard
+    name: A2A Agent Card (provider-hosted)
+    url: https://api.rosentic.com/.well-known/agent-card.json
+  - type: RateLimits
+    url: rate-limits/rosentic-com-rate-limits.yml
+- aid: rosentic-com:rosentic-dashboard-feed-api
+  name: Rosentic Dashboard Feed API
+  image: https://raw.githubusercontent.com/Rosentic/cursor-plugin/main/assets/logo.png
+  description: >-
+    The Bearer-key REST surface documented on the orchestrator-integration page for wiring Conductor, Claude
+    Squad, LangGraph and other agent orchestrators to a Rosentic workspace: GET /v1/feed/rules returns
+    fleet-learned merge-safety rules (id, layer, severity, confidence, category) for prompt injection and
+    task routing — documented as "Available Now" — while GET /v1/feed/hotspots (repo risk score and hot
+    surfaces) and POST /v1/scan (hosted sibling scan) are documented as Coming Soon, with a published error
+    table (400 invalid_request, 401 unauthorized, 403 plan_required, 404 repo_not_found, 408 scan_timeout,
+    429 rate_limit_exceeded, 500 internal_error, 503 scan_unavailable). Authentication is a workspace API
+    key (ros_live_ prefix, issued once at https://api.rosentic.com/onboard) as Authorization: Bearer. On
+    2026-09-19 an anonymous GET of /v1/feed/rules returned the host's generic 404 ({"error":"not_found"})
+    rather than the documented 401, so the endpoint could not be confirmed live without a key. No OpenAPI is
+    published; the API root https://api.rosentic.com/ answers a JSON descriptor naming auth, share,
+    scan-upload, observations and agent-card URLs.
+  humanURL: https://rosentic.com/docs/integrations/
+  baseURL: https://api.rosentic.com
+  tags:
+  - Developer Tools
+  - AI Coding Agents
+  - Merge Safety
+  properties:
+  - type: APIReference
+    url: https://rosentic.com/docs/integrations/
+  - type: Documentation
+    url: https://rosentic.com/docs/
+  - type: ErrorCatalog
+    url: errors/rosentic-com-problem-types.yml
+  - type: Authentication
+    url: authentication/rosentic-com-authentication.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: DomainSecurity
+  url: security/rosentic-com-domain-security.yml
 - type: Website
   url: https://rosentic.com/
+- type: Documentation
+  url: https://rosentic.com/docs/
+- type: APIReference
+  url: https://rosentic.com/docs/integrations/
+- type: GettingStarted
+  url: https://rosentic.com/install/
+- type: Pricing
+  url: https://rosentic.com/pricing/
+- type: Plans
+  url: plans/rosentic-com-plans-pricing.yml
+- type: Blog
+  url: https://rosentic.com/blog/
+- type: ChangeLog
+  url: https://rosentic.com/changelog/
+- type: ChangeLog
+  name: Changelog (structured, from the provider's JSON feed)
+  url: changelog/rosentic-com-changelog.yml
+- type: GitHubOrganization
+  url: https://github.com/Rosentic
+- type: Support
+  url: https://github.com/Rosentic/rosentic-action/issues
+- type: SignUp
+  url: https://api.rosentic.com/onboard
+- type: LinkedIn
+  url: https://www.linkedin.com/company/rosentic/
+- type: Twitter
+  url: https://x.com/RosenticHQ
+- type: LLMsTxt
+  url: llms/rosentic-com-llms.txt
+- type: LLMsTxt
+  name: llms.txt (provider-hosted)
+  url: https://rosentic.com/llms.txt
+- type: WellKnown
+  url: well-known/rosentic-com-well-known.yml
+- type: AgentCard
+  url: a2a/rosentic-com-a2a.yml
+- type: MCPServer
+  url: mcp/rosentic-com-mcp.yml
+- type: OAuthScopes
+  url: scopes/rosentic-com-scopes.yml
+- type: Authentication
+  url: authentication/rosentic-com-authentication.yml
+- type: Packages
+  url: packages/rosentic-com-packages.yml
+- type: CLI
+  url: cli/rosentic-com-cli.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Sandbox
+  url: sandbox/rosentic-com-sandbox.yml
+- type: RateLimits
+  url: rate-limits/rosentic-com-rate-limits.yml
+- type: ErrorCatalog
+  url: errors/rosentic-com-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/rosentic-com-lifecycle.yml
+- type: Conventions
+  url: conventions/rosentic-com-conventions.yml
+- type: Conformance
+  url: conformance/rosentic-com-conformance.yml
+x-enrichment:
+  date: '2026-09-19'
+  status: enriched
+  artifacts_added: 25
+  pass: local-v3

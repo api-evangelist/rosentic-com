@@ -1,0 +1,66 @@
+generated: '2026-09-19'
+method: searched
+source: https://pypi.org/project/rosentic-mcp/
+docs:
+- https://rosentic.com/mcp/
+- https://rosentic.com/docs/
+clis:
+- name: rosentic-mcp
+  purpose: >-
+    The rosentic-mcp binary is both the local MCP server (run with no arguments, stdio) and Rosentic's
+    command-line surface for enforcement and diagnostics: install committed git and Claude Code hooks, run
+    the merge gate directly in CI or by hand, and check which server and engine are answering.
+  language: Python
+  package: https://pypi.org/project/rosentic-mcp/
+  version: 0.2.9
+  repository: https://github.com/Rosentic/rosentic-action
+  docs: https://pypi.org/project/rosentic-mcp/
+  install:
+  - method: pip
+    steps: [pip3 install --upgrade rosentic-mcp]
+    note: '"Use --upgrade even on a machine that already has the package: a plain pip install is a no-op for returning users and silently keeps stale code."'
+  - method: uvx
+    steps: ['uvx --from rosentic-mcp rosentic-mcp']
+  prerequisites: [Python 3.11+, git, 'Docker Desktop running (pulls ghcr.io/rosentic/rosentic-engine on first scan) or ROSENTIC_ENGINE_PATH pointing at a local engine checkout']
+  invocation: rosentic-mcp [command] [flags]
+  commands:
+  - group: server
+    commands:
+    - name: (no arguments)
+      description: Start the MCP server on stdio — what {"command":"rosentic-mcp"} in an MCP client config launches.
+  - group: enforcement
+    commands:
+    - name: install-hooks
+      description: >-
+        Write a committed .githooks/pre-push that runs the gate and exits nonzero on UNSAFE, set
+        git config core.hooksPath .githooks for this clone, and add Claude Code hooks to .claude/settings.json
+        (PreToolUse blocks an UNSAFE write; Stop keeps the agent working while UNSAFE findings exist).
+        Idempotent; appends to an existing settings.json and never removes the user's entries.
+      usage: 'rosentic-mcp install-hooks && git add .githooks .claude/settings.json'
+    - name: gate
+      description: Run the merge gate directly. Exit 0 clean, 1 UNSAFE, 2 scan error. Fails closed — if the scan cannot run the push is blocked with an explanation.
+      usage: 'rosentic-mcp gate --repo . --base main'
+      flags: [--repo, --base]
+      env: ['ROSENTIC_SKIP=1 bypasses one push', 'ROSENTIC_STRICT=1 makes WARNING findings block too']
+  - group: diagnostics
+    commands:
+    - name: doctor
+      description: Report which server answered, which engine it resolved, and whether that combination is supported. Names a source checkout answering instead of the installed package.
+      usage: 'rosentic-mcp doctor   # --json for machine-readable; exits 1 when unsupported'
+      flags: [--json]
+  environment:
+  - {name: ROSENTIC_API_KEY, purpose: 'workspace key (ros_live_ prefix) for get_verdict / get_remediation_queue and dashboard history', required: false}
+  - {name: ROSENTIC_ENGINE_PATH, purpose: 'local engine checkout instead of the Docker image', required: false}
+  - {name: ROSENTIC_SKIP, purpose: 'bypass one gated push', required: false}
+  - {name: ROSENTIC_STRICT, purpose: 'make WARNING block at the gate', required: false}
+  key_flows:
+  - name: Commit the enforcement gate to a repo
+    steps: [pip3 install --upgrade rosentic-mcp, rosentic-mcp install-hooks, 'git add .githooks .claude/settings.json && git commit -m "Add Rosentic enforcement gate"']
+  - name: Verify the install answers from the package
+    steps: [rosentic-mcp doctor, 'claude mcp get rosentic']
+related:
+  github_action: 'uses: Rosentic/rosentic-action@v1  (the CI backstop; inputs in packages/rosentic-com-packages.yml)'
+  engine_cli: >-
+    The docs' orchestrator page also shows "python3 detect.py check-siblings <repo> --base main --branches a,b,c
+    --format json", the engine's own entrypoint inside the container; it is not distributed as a standalone
+    binary and is recorded here only because the provider documents it as the Tier-3 "CLI available now".

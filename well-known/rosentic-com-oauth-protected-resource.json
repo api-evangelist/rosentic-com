@@ -1,0 +1,1 @@
+{"resource":"https://api.rosentic.com/mcp","authorization_servers":["https://api.rosentic.com"],"bearer_methods_supported":["header"],"scopes_supported":["rosentic:remote:read"],"resource_documentation":"https://github.com/Rosentic/rosentic/blob/main/docs/remote.md"}

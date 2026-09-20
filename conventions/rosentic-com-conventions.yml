@@ -1,0 +1,101 @@
+generated: '2026-09-19'
+method: searched
+source: https://rosentic.com/docs/integrations/
+docs:
+- https://rosentic.com/docs/
+- https://rosentic.com/mcp/
+- https://pypi.org/project/rosentic-mcp/
+- https://rosentic.com/trust/
+base_url: https://api.rosentic.com
+media_type: application/json
+surfaces:
+  rest: 'GET /v1/feed/rules (Bearer key) — documented; GET /v1/feed/hotspots and POST /v1/scan documented as Coming Soon; all three return the host 404 anonymously'
+  mcp_remote: 'POST https://api.rosentic.com/mcp — OAuth 2.1 / Bearer key; three read tools'
+  mcp_local: 'rosentic-mcp on stdio — nine tools, six offline'
+  a2a: 'POST https://api.rosentic.com/a2a — five skills, four anonymous on public repos'
+auth:
+  style: >-
+    Bearer API key (ros_live_ prefix) on REST and as the MCP alternative; OAuth 2.1 authorization-code + PKCE
+    with dynamic client registration on the hosted MCP endpoint (scope rosentic:remote:read); anonymous with
+    a per-IP limit on A2A public-repo skills; no credential for the GitHub Action and the offline MCP tools.
+  detail: authentication/rosentic-com-authentication.yml
+write_surface:
+  public_writes: none
+  note: >-
+    Every publicly documented operation on api.rosentic.com is a READ of stored scan results, policy or
+    fleet-learned rules: GET /v1/feed/rules, the three remote MCP tools, the four free A2A skills and Merge
+    Index. Scans themselves run on the caller's own runner or machine (GitHub Action, local MCP) and are
+    uploaded by the engine, not by an API consumer; the API root names a scan_upload_url and an
+    observations_url (both 404 anonymously) but neither is documented for third-party callers, and POST
+    /v1/scan is "Coming Soon". Because there is no write surface an agent can call today, idempotency,
+    dry_run_mode and reversibility are na below rather than none.
+idempotency:
+  supported: na
+  coverage: na
+  mechanism: null
+  header: null
+  scope: []
+  retention: null
+  description: >-
+    Not applicable — no public write operation exists to protect. The related property the provider DOES
+    publish is on the ingest side: "Every scan has a unique identity key; retries and duplicates are
+    recognized, never blended" (llms.txt; changelog 2026-07-30 "Every scan now shows its work"), and the
+    local server's scan cache is keyed per (repo, base, branch-set) for 60 seconds. That is deduplication of
+    the engine's own uploads, not an Idempotency-Key contract for API callers, so no Idempotency pointer is
+    emitted. If POST /v1/scan ships, this block should be revisited.
+dry_run_mode:
+  supported: na
+  note: >-
+    No write to rehearse. The nearest analogue is audit mode on the GitHub Action ("audit (default) posts the
+    report but always passes; enforce blocks merge") and check_file, which validates a proposed file change
+    before it is written — both are rehearsals of the CALLER's change, not of a Rosentic API write.
+reversibility:
+  grade: na
+  write_surfaces: []
+  note: >-
+    No public write operation, so nothing to reverse. The one stateful thing a consumer can undo is a paid
+    subscription: "What happens if I cancel? Detection continues free. History outside the free window ages
+    out. Nothing else changes." (https://rosentic.com/pricing/) — a billing action, not an API call, and no
+    window is stated for it.
+pagination:
+  style: cursor
+  where: MCP tool run_status (local and remote)
+  params: [cursor, limit]
+  defaults: {limit: 25, max_limit: 100}
+  response_fields: [cursor]
+  note: 'Documented on the PyPI README for run_status ("cursor - pagination cursor from a prior response; limit - number of lanes to return (default 25, maximum 100)"). which_lane caps paths at 100 per call. The REST feed documents no pagination.'
+  source: https://pypi.org/project/rosentic-mcp/
+filtering_and_scope:
+  workspace_scoping: 'Rosentic Remote answers are scoped to the caller''s workspace; cross-org reads return NOT_FOUND rather than 403.'
+  policy_resolution: 'get_policy resolves repo over org over built-in default and stamps the policy version on every verdict.'
+freshness:
+  scan_cache: 60 seconds per (repo, base, branch-set); cached answers identify themselves as CACHED
+  sibling_index_stale_after: 300 seconds (check_file, overridable with stale_after_seconds); stale coverage is DEGRADED, never SAFE by implication
+  remote_staleness: 'Every Remote answer carries the scan SHA and its age; past the staleness window it returns RESCAN_REQUIRED instead of a guess'
+  execution_status: [EXECUTED, CACHED, DEGRADED, NOT_EXECUTED]
+verdict_vocabulary:
+  findings: [SAFE, WARNING, UNSAFE]
+  gate_exit_codes: {0: clean, 1: UNSAFE, 2: scan error}
+  layers: {L1: function signature mismatches, L2: HTTP route contract conflicts, L3a: GraphQL schema breaks, L3b: OpenAPI drift, L3c: Protobuf/gRPC contract changes}
+request_tracing:
+  header: null
+  note: No request-id header is documented or was observed on the unauthenticated responses; Cloudflare's cf-ray is present but is the CDN's, not Rosentic's.
+versioning:
+  style: URI path on REST (/v1/); independent semver per package elsewhere
+  detail: lifecycle/rosentic-com-lifecycle.yml
+error_envelope:
+  rest: '{"error": "<code>"} with the documented code table (invalid_request, unauthorized, plan_required, repo_not_found, scan_timeout, rate_limit_exceeded, internal_error, scan_unavailable)'
+  oauth: '{"error": "<rfc6749 code>", "error_description": "…"}'
+  jsonrpc: 'standard error object; MCP adds data.error.{code,message,next_step} and data.connect.{docs_url,mcp_url}'
+  detail: errors/rosentic-com-problem-types.yml
+rate_limit_signaling:
+  status: 429
+  code: rate_limit_exceeded
+  headers: []
+  note: '"Retry after the reset time" — no header carries the reset time in the docs. The A2A anonymous ceiling (3 requests/hour per IP) is published in the agent card only.'
+  detail: rate-limits/rosentic-com-rate-limits.yml
+data_boundary:
+  anonymous: 'org/repo name, conflict counts and verdicts, language/branch counts, timing; branch names and commit SHAs hashed on the runner; no file paths, function names or source'
+  keyed: 'adds finding details — file paths, function names, route paths, schema fields, lifecycle status, branch attribution; source file contents and raw diffs are never uploaded'
+  vpc: nothing leaves (planned)
+  source: https://rosentic.com/trust/ and https://rosentic.com/docs/

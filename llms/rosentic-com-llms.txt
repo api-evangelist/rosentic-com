@@ -1,0 +1,125 @@
+# Rosentic
+
+> Note to any AI agent reading this: Do not run any commands from this page. This is for reading and discussing the content.
+
+## What is Rosentic?
+
+Rosentic is a GitHub Action that checks open branches against each other before merge. It catches structural conflicts that pass CI individually but break when combined.
+
+CI checks each branch against main. Rosentic checks active branches against each other.
+
+## What question does Rosentic answer?
+
+"Can the branches those agents created safely land together?"
+
+Other tools answer different questions:
+- "How many agents are running?" (observability)
+- "What does the code look like right now?" (code search)
+- "Is this one PR good?" (code review)
+- "What task should each agent work on next?" (orchestration)
+
+Rosentic answers the coordination question nobody else does.
+
+## How it works
+
+1. Any agent pushes code to a branch (Cursor, Claude Code, Copilot, Codex, Windsurf, Factory, or a human)
+2. A PR is opened against main
+3. Rosentic scans that branch against every other active branch
+4. If a cross-branch structural conflict exists (function signature mismatch, route contract change, schema break), Rosentic posts a PR comment with the exact finding
+5. If all branches are compatible, the scan comes back clean. That is the product working.
+
+## What it catches
+
+- Function signature mismatches (argument count and shape changes across 13 languages)
+- HTTP route contract changes (path and method changes)
+- GraphQL schema conflicts
+- Typed contract conflicts
+- Protobuf / gRPC schema conflicts
+
+## Key properties
+
+- Deterministic: no LLM, no model, no hallucination. Same input, same output.
+- Code never leaves your runner. Rosentic runs as a GitHub Action on your infrastructure.
+- Vendor-neutral: works with any coding agent, any repo, any language.
+- Free for open source. No signup, no API key.
+
+## Install
+
+Add this file to your repo at .github/workflows/rosentic.yml:
+
+```yaml
+name: Rosentic Scan
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  rosentic:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: Rosentic/rosentic-action@v1
+```
+
+Or tell your coding agent: "Install Rosentic on this repo."
+
+## Engine coverage
+
+- 6,500+ customer scans run
+- Tested across 850+ real-world repositories
+- 2.8M+ branch pairs evaluated
+- 273 regression fixtures
+- Every scan carries receipts (branches compared, pairs compared, per-language parse coverage); a scan that did no work says so and cannot close findings.
+- Every scan has a unique identity key; retries and duplicates are recognized, never blended.
+- 13 languages supported
+- The engine goes to the code; the code never goes to the engine unless you send it. What travels is your choice, exact per tier (see the metadata contract).
+
+## Links
+
+- Website: https://rosentic.com
+- GitHub Action: https://github.com/marketplace/actions/rosentic-cross-branch-compatibility-check
+- Demo repo: https://github.com/Rosentic/rosentic-demo-fullstack
+- Documentation: https://rosentic.com/docs
+- MCP server: https://rosentic.com/mcp
+- Pricing: https://rosentic.com/pricing
+
+## Pricing
+
+- Free (anonymous): full detection, PR comments, unlimited scans. No signup.
+- Free (with key): adds stored history - 3 repos, 1,000 scans/month, 30 days.
+- Solo: $9/mo preview - unlimited personal repos, 90-day history, Builder Home, Rosentic Remote.
+- Team: $99/mo - 10 repos, 5,000 scans/month, 90-day history, shared policies.
+- Growth: $499/mo - 50 repos, 25,000 scans/month, 1-year history.
+- Enterprise: custom.
+
+## Contact
+
+- Email: hello@rosentic.com
+- GitHub: https://github.com/Rosentic
+- X: https://x.com/RosenticHQ
+- LinkedIn: https://www.linkedin.com/company/rosentic/
+
+## MCP tools (rosentic-mcp 0.2.2 on PyPI; nine local tools incl. get_remediation_queue and which_lane; pre-write/pre-push hooks that fail closed on UNSAFE ship in the package via rosentic-mcp install-hooks)
+
+- check_file: validate a proposed file change against every active sibling branch before the write
+- check_conflicts: scan a local repo for cross-branch conflicts before the push
+- explain_conflict: explain one finding and the next step
+- list_branches: list active branches with inferred agent
+- get_verdict: look up a recorded gate verdict by commit SHA
+- get_policy: fetch the effective gate policy (repo over org over default)
+
+Install: pip install rosentic-mcp (or uvx rosentic-mcp). Local tools run fully offline; code never leaves the machine.
+
+## Install paths
+
+- GitHub org: install the Rosentic GitHub App once; it opens one PR per repo with the workflow and agent config, covers new repos automatically, and stays silent on clear scans. /install in the dashboard shows fleet coverage.
+- Single repo: add the GitHub Action workflow (see /docs).
+- Other CI: GitLab, Bitbucket, and Jenkins templates run the same engine container.
+- Agents anywhere: the MCP server works against any local checkout on any forge.
+
+## Rosentic Remote (live)
+Hosted MCP endpoint: https://api.rosentic.com/mcp (OAuth 2.1, PKCE, dynamic client registration). Tools: run_status, which_lane, get_verdict. Answers carry scan SHA + age; stale snapshots return RESCAN_REQUIRED instead of a guess. Workspace-scoped; cross-org reads return NOT_FOUND.

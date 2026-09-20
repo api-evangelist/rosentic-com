@@ -1,0 +1,166 @@
+generated: '2026-09-19'
+method: probed
+status: published
+source: https://api.rosentic.com/mcp
+docs:
+- https://rosentic.com/mcp/
+- https://pypi.org/project/rosentic-mcp/
+- https://rosentic.com/llms.txt
+summary: >-
+  Rosentic ships MCP two ways and they are different products. (1) Rosentic Remote — a hosted Streamable-HTTP
+  endpoint at https://api.rosentic.com/mcp, live since 2026-07-23 per the provider's changelog, behind OAuth
+  2.1: an anonymous POST of initialize or tools/list returns HTTP 401 with a JSON-RPC error -32001
+  "Authentication required" (data.error.code AUTH_REQUIRED) and a WWW-Authenticate header of Bearer
+  resource_metadata="https://api.rosentic.com/.well-known/oauth-protected-resource/mcp",
+  scope="rosentic:remote:read" — the RFC 9728 discovery chain, which resolves to an RFC 8414 authorization
+  server on the same host with PKCE S256 and dynamic client registration (both documents captured in
+  well-known/). The live tool schemas are therefore auth-gated; the three remote tools below come from the
+  provider's own MCP page and llms.txt, names and descriptions only. (2) rosentic-mcp — a local stdio server
+  on PyPI (0.2.9, released 2026-09-05, FastMCP-based, Python 3.11+) exposing nine tools, six fully offline
+  against a local checkout, three reading the dashboard API; it needs the engine container
+  ghcr.io/rosentic/rosentic-engine (Docker) or a local engine path. The same package is the MCP server the
+  Cursor plugin (github.com/Rosentic/cursor-plugin, mcp.json {"command":"rosentic-mcp"}) and the docs'
+  .mcp.json snippets launch. No OpenAPI is published for either surface, so no tool crosswalk is derived.
+deployment:
+  mode: both
+  endpoint: https://api.rosentic.com/mcp
+  install: 'pip3 install --upgrade rosentic-mcp   # or: claude mcp add rosentic -- uvx --from rosentic-mcp rosentic-mcp'
+  package: https://pypi.org/project/rosentic-mcp/
+  auth: oauth
+  verified: probed
+  note: >-
+    The remote endpoint was probed (401 + RFC 9728 challenge, never a scan or a tool call). The stdio
+    package's existence and version were read from the PyPI JSON API; it was not installed or run. auth
+    describes the REMOTE endpoint — OAuth 2.1 authorization-code with PKCE, public client (token auth
+    "none"), scope rosentic:remote:read, or per the 401 body "a Rosentic API key or dashboard session"
+    (Authorization: Bearer <ROSENTIC_API_KEY>, keys prefixed ros_live_ per the PyPI docs). The local server
+    needs no credential for its six offline tools; get_verdict needs ROSENTIC_API_KEY and get_policy is a
+    public read.
+servers:
+- id: rosentic-remote
+  name: Rosentic Remote
+  endpoint: https://api.rosentic.com/mcp
+  transport: streamable-http
+  http_methods: [POST]
+  auth: oauth2.1 (authorization_code + PKCE S256, DCR at https://api.rosentic.com/oauth/register) or Bearer API key
+  scope: rosentic:remote:read
+  status: live
+  live_since: '2026-07-23'
+  probe:
+    fetched: '2026-09-19'
+    tools_list:
+      http_status: 401
+      content_type: application/json; charset=utf-8
+      www_authenticate: 'Bearer resource_metadata="https://api.rosentic.com/.well-known/oauth-protected-resource/mcp", scope="rosentic:remote:read"'
+      body: '{"jsonrpc":"2.0","id":1,"error":{"code":-32001,"message":"Authentication required","data":{"error":{"code":"AUTH_REQUIRED","message":"Authenticate with a Rosentic API key or dashboard session.","next_step":"Open https://github.com/Rosentic/rosentic/blob/main/docs/remote.md, then connect https://api.rosentic.com/mcp with Authorization: Bearer <ROSENTIC_API_KEY>."},"connect":{"docs_url":"https://github.com/Rosentic/rosentic/blob/main/docs/remote.md","mcp_url":"https://api.rosentic.com/mcp"}}}}'
+      gated: true
+    initialize:
+      http_status: 401
+      note: Same -32001 AUTH_REQUIRED envelope. Protocol version and serverInfo cannot be read anonymously.
+    get_request: {http_status: 401}
+    cors: 'access-control-allow-headers lists MCP-Protocol-Version and Mcp-Session-Id, consistent with a Streamable HTTP MCP server.'
+    resource_documentation: {url: 'https://github.com/Rosentic/rosentic/blob/main/docs/remote.md', http_status: 404, note: 'The repository the OAuth metadata and the 401 body point at is not public; the public remote docs are https://rosentic.com/mcp/.'}
+  tools_source: https://rosentic.com/mcp/ and https://rosentic.com/llms.txt (names + descriptions; inputSchema requires authenticated introspection)
+  tool_count: 3
+  tools:
+  - name: run_status
+    category: run
+    description: Every lane in the run — branch, head, merged or not, sequence position, what is clear to land next, and branches sitting ahead of base.
+    schema: gated
+  - name: which_lane
+    category: run
+    description: Which lane owns these paths, per the run manifest. The answer to "where does this paste go."
+    schema: gated
+  - name: get_verdict
+    category: ledger
+    description: The recorded gate decision for a commit, from the ledger, from anywhere.
+    schema: gated
+  semantics: >-
+    "Every answer names the scan it came from and how old it is. Past the staleness window, Remote returns
+    the rescan command (RESCAN_REQUIRED) instead of a confident guess. Scoped to your workspace; other orgs
+    return NOT_FOUND." Answers carry scan SHA + age. All three tools are reads of stored scan snapshots; the
+    hosted server does not run the engine on a repository.
+- id: rosentic-mcp-local
+  name: rosentic-mcp (local stdio)
+  transport: stdio
+  package: https://pypi.org/project/rosentic-mcp/
+  version: 0.2.9
+  published: '2026-09-05'
+  install:
+  - pip3 install --upgrade rosentic-mcp
+  - uvx --from rosentic-mcp rosentic-mcp
+  - claude mcp add rosentic -- uvx --from rosentic-mcp rosentic-mcp
+  - '/plugin marketplace add Rosentic/rosentic && /plugin install rosentic@rosentic-rosentic  (documented on https://rosentic.com/mcp/; the Rosentic/rosentic repository 404s anonymously)'
+  config: '{"mcpServers": {"rosentic": {"command": "rosentic-mcp"}}}'
+  engine: 'ghcr.io/rosentic/rosentic-engine pulled on first scan (Docker), or ROSENTIC_ENGINE_PATH to a local engine checkout'
+  requires: [Python 3.11+, git repository with branches, fastmcp>=3.4.4, pyyaml>=6.0.3]
+  auth: none for the six local tools; ROSENTIC_API_KEY (ros_live_ prefix) for get_verdict and get_remediation_queue; get_policy is a public read
+  status: live
+  tools_source: https://pypi.org/project/rosentic-mcp/ (README of 0.2.9) and https://rosentic.com/mcp/
+  tool_count: 9
+  tools:
+  - name: check_file
+    category: pre-write
+    description: Validate a proposed complete file change against every active sibling branch before the write. Returns SAFE/WARNING/UNSAFE, conflict direction, consumers with branch attribution, checked and skipped branches, and index freshness.
+    parameters: {required: [repo_path, file, content], optional: [branch, base, stale_after_seconds]}
+    offline: true
+  - name: check_conflicts
+    category: pre-push
+    description: Scan a local repo for cross-branch conflicts affecting the current branch; summary prose or structured JSON with finding IDs.
+    parameters: {required: [repo_path], optional: [branch, base, format]}
+    offline: true
+  - name: explain_conflict
+    category: findings
+    description: Explain one finding from a recent scan — affected branches, consumer locations, remediation steps.
+    parameters: {required: [repo_path, finding_id]}
+    offline: true
+  - name: list_branches
+    category: branches
+    description: List local branches sorted by most recent commit with age, ahead/behind counts and inferred agent.
+    parameters: {required: [repo_path]}
+    offline: true
+  - name: run_status
+    category: run
+    description: Read .rosentic/run.yaml plus local git heads and merge state — each lane's sequence position, merged-or-not, the lane clear to land, old branches ahead of base.
+    parameters: {required: [repo], optional: [cursor, limit]}
+    pagination: {style: cursor, params: [cursor, limit], default_limit: 25, max_limit: 100}
+    offline: true
+  - name: which_lane
+    category: run
+    description: Match repository-relative paths against the manifest's declared protected_paths; missing or ambiguous ownership is returned explicitly.
+    parameters: {required: [repo, paths], constraints: 'paths: 1 to 100 entries'}
+    offline: true
+  - name: get_verdict
+    category: ledger
+    description: Look up recorded gate verdicts in the append-only audit ledger by SHA via the dashboard API. Requires ROSENTIC_API_KEY. Degrades gracefully offline.
+    parameters: {required: [repo, sha]}
+    offline: false
+  - name: get_policy
+    category: policy
+    description: Fetch the effective gate policy (repo > org default > built-in) — mode, severity threshold, per-layer enforcement, branch-pattern rules, policy version. Public read.
+    parameters: {required: [org], optional: [repo]}
+    offline: false
+  - name: get_remediation_queue
+    category: findings
+    description: The ordered list of findings to fix next, ranked by blast radius and recurrence (dashboard-backed).
+    offline: false
+  response_contract: >-
+    Every response carries a discrete execution_status — EXECUTED, CACHED (validated, 60-second window per
+    repo/base/branch-set), DEGRADED (stale sibling index after 300 s, skipped or unindexed branches) or
+    NOT_EXECUTED — plus a model-facing message. An empty result is meaningful only when the status is
+    EXECUTED or CACHED. Results name the engine that produced them and flag ROSENTIC ENGINE SOURCE UNEXPECTED
+    when a source checkout rather than the installed package answered.
+  enforcement: >-
+    rosentic-mcp install-hooks writes a committed .githooks/pre-push that runs rosentic-mcp gate (exit 0 clean,
+    1 UNSAFE, 2 scan error; ROSENTIC_SKIP=1 bypasses one push, ROSENTIC_STRICT=1 makes WARNING block) and
+    Claude Code hooks in .claude/settings.json (PreToolUse blocks an UNSAFE write; Stop keeps the agent
+    working while UNSAFE findings exist). See cli/rosentic-com-cli.yml.
+listings:
+- {where: Cursor plugin, url: 'https://github.com/Rosentic/cursor-plugin', note: 'plugin.json 1.1.0 wires mcp.json, one skill and one rule to the same rosentic-mcp binary'}
+- {where: GitHub Marketplace (Action, not MCP), url: 'https://github.com/marketplace/actions/rosentic-cross-branch-compatibility-check'}
+surface_relationship: >-
+  The remote and local servers overlap on two names only (run_status, which_lane, get_verdict are remote; the
+  local server has those three plus six more). The A2A card's five skills reuse three local tool names
+  (check_conflicts, explain_conflict, list_branches) as skill ids and add assess_integration_posture and
+  merge_index. No REST contract is published, so none of this can be bound to operationIds — see
+  a2a/rosentic-com-a2a.yml surface_relationship.

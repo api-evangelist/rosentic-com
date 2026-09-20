@@ -1,0 +1,16 @@
+---
+description: Consider checking cross-branch compatibility before push or PR creation.
+alwaysApply: false
+---
+
+When about to push, create a pull request, merge, or change a public contract, consider running Rosentic's `check_conflicts` tool to verify this branch is compatible with other active branches.
+
+Use Rosentic for integration-state compatibility:
+
+- function signature changes
+- HTTP route changes
+- GraphQL, OpenAPI, or protobuf schema changes
+- branches authored by coding agents in parallel
+
+Keep this lightweight. Do not block normal work just to run Rosentic, but surface it when the user is near a merge boundary or is changing code that other branches may call.
+

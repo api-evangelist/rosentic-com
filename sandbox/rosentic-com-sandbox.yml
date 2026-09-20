@@ -1,0 +1,43 @@
+generated: '2026-09-19'
+method: searched
+source: https://github.com/Rosentic/rosentic-demo
+docs:
+- https://rosentic.com/demo/
+- https://rosentic.com/docs/
+- https://github.com/Rosentic/rosentic-demo-fullstack
+- https://github.com/Rosentic/rosentic-simulate
+summary: >-
+  Rosentic has no separate test environment, no test-mode keys and no magic test values — production is the
+  sandbox, and the free anonymous tier is the way to try it ("No signup. No API key. No account."). What the
+  provider publishes instead is a set of first-party FIXTURE repositories built to break: rosentic-demo
+  ("twelve parallel agent branches that each pass CI alone — built to break when combined"; the docs quote
+  it as 12 branches, 60 UNSAFE, 6 WARNING, first scan 1.0s), rosentic-demo-fullstack (api, gateway, proto,
+  schema, services across the stack), and rosentic-simulate, a script that simulates parallel AI coding
+  agents on any real repo to manufacture cross-branch conflicts. Forking a demo repo and adding the one-file
+  workflow is the documented 90-second proof.
+test_vs_live:
+  separate_environment: false
+  key_prefixes: 'ros_live_ (workspace API key) — no test-key prefix is published'
+  modes: ['anonymous (no key): full detection, nothing stored', 'keyed: adds dashboard history', 'audit vs enforce on the Action: audit posts the report and always passes; enforce blocks merge on conflicts']
+  note: Audit mode is the rehearsal switch — new installs start there and the docs say to switch to enforce "when you trust the results".
+fixtures:
+- name: rosentic-demo
+  url: https://github.com/Rosentic/rosentic-demo
+  kind: repository with 12 seeded conflicting branches (backend, frontend, graphql, notifications, payment, proto)
+  expected_result: 60 UNSAFE, 6 WARNING (per https://rosentic.com/docs/ Performance table)
+  source: https://github.com/Rosentic/rosentic-demo (fetched 2026-09-19, HTTP 200)
+- name: rosentic-demo-fullstack
+  url: https://github.com/Rosentic/rosentic-demo-fullstack
+  kind: fullstack repository (api, gateway, proto, schema, services/order, frontend) with parallel agent branches that pass CI alone and break together
+  source: https://github.com/Rosentic/rosentic-demo-fullstack (fetched 2026-09-19, HTTP 200); linked from llms.txt as "Demo repo"
+- name: rosentic-simulate
+  url: https://github.com/Rosentic/rosentic-simulate
+  kind: simulate_agents.py — generates parallel-agent branches on a real repo to find cross-branch conflicts
+  source: https://github.com/Rosentic/rosentic-simulate (fetched 2026-09-19, HTTP 200)
+- name: /demo page
+  url: https://rosentic.com/demo/
+  kind: hosted walkthrough ("Run the 90-second proof"; "watch it catch 21 live")
+  source: https://rosentic.com/demo/ (200, 4,538 bytes)
+time_simulation: none
+triggers: none — conflicts are triggered by pushing branches; the MCP check_file tool accepts proposed file content and evaluates it without writing
+note: No test values were invented; every item above is a provider-published repository or page.
