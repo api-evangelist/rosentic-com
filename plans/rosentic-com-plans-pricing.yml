@@ -69,3 +69,53 @@ overage: not published — quotas are stated as caps, with no per-scan overage p
 notes:
 - 'The pricing page carries the line "stored history comes from CI scans today · local memory arrives with the upload path", i.e. local MCP scans do not yet count toward or populate history.'
 - 'Free for open source is stated on the GitHub Action release (changelog 2026-03-12) and llms.txt.'
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - free
+  - subscription
+  units: []
+  plans:
+  - name: Free (anonymous)
+    access: other
+    model: free
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Free (with key)
+    access: other
+    model: free
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Solo (preview)
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Team
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Growth (design partner)
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Enterprise
+    access: other
+    model: unstated
+    model_how: derived
+    units: []
+    periods:
+    - term
